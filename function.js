@@ -1,63 +1,60 @@
-const header = document.querySelector('header');
-const section = document.querySelector('section');
+const API_KEY = "apiKey=AQcHL3ZPkDYpRHSRoeemBhjgor06QW6b" 
+const URL = "https://api.giphy.com/v1"
+const RANDOM_END_POINT = "/gifs/random?"
+const imgWrapper = document.getElementById('imgWrapper');
+const gifBtn = document.querySelector('.btn');
+const searchInput  = document.getElementById('input-box');
 
-const requestURL = 'https://mdn.github.io/learning-area/javascript/oojs/json/superheroes.json';
-
-let request = new XMLHttpRequest();
-request.open('GET', requestURL);
-
-request.responseType = 'json';
-request.send();
-
-request.onload = function() {
- 
-    let superHeroes = request.response;
-    populateHeader(superHeroes);
-    showHeroes(superHeroes);
+const getGif = () => {
+  for (let i=0; i < 5; i++){
+    // we create a new instance of an HTTP request
+    var request = new XMLHttpRequest();
+    gifSettings(request);
+    destoryhtml(imgWrapper);
+    gifsImgOutput(request);
   }
+}
 
+const gifSettings = request => {
+  //we get the text that the user has typed in
+  searchTerm = searchInput.value;
+  // we set up the url endpoint we want to reach
+  const searchQuery = "&tag=" + searchTerm;
+  const requestUrl = URL + RANDOM_END_POINT + API_KEY + searchQuery;
 
-  function populateHeader(jsonObj) {
-    const myH1 = document.createElement('h1');
-    myH1.textContent = jsonObj['squadName'];
-    header.appendChild(myH1);
-  
-    const myPara = document.createElement('p');
-    myPara.textContent = 'Hometown: ' + jsonObj['homeTown'] + ' // Formed: ' + jsonObj['formed'];
-    header.appendChild(myPara);
-  }
-  
-  function showHeroes(jsonObj) {
-    const heroes = jsonObj['members'];
-        
-    for (let i = 0; i < heroes.length; i++) {
-      const myArticle = document.createElement('article');
-      const myH2 = document.createElement('h2');
-      const myPara1 = document.createElement('p');
-      const myPara2 = document.createElement('p');
-      const myPara3 = document.createElement('p');
-      const myList = document.createElement('ul');
-  
-      myH2.textContent = heroes[i].name;
-      myPara1.textContent = 'Secret identity: ' + heroes[i].secretIdentity;
-      myPara2.textContent = 'Age: ' + heroes[i].age;
-      myPara3.textContent = 'Superpowers:';
-          
-      let superPowers = heroes[i].powers;
-      for (let j = 0; j < superPowers.length; j++) {
-        const listItem = document.createElement('li');
-        listItem.textContent = superPowers[j];
-        myList.appendChild(listItem);
-      }
-  
-      myArticle.appendChild(myH2);
-      myArticle.appendChild(myPara1);
-      myArticle.appendChild(myPara2);
-      myArticle.appendChild(myPara3);
-      myArticle.appendChild(myList);
-  
-      section.appendChild(myArticle);
+  getGifUrl(request, requestUrl);
+}
+
+const getGifUrl = (request, requestUrl) =>{
+  // we make the request
+  request.open('GET', requestUrl);
+  request.responseType = 'json';
+  request.send();
+}
+
+const gifsImgOutput = request => {
+  //we do something with the successful response
+    request.onload = function() {
+      let response = request.response;
+      let imageUrl  = response.data.image_url;
+     
+      const gifsItem = document.createElement('img');
+      gifsItem.src = imageUrl;
+      imgWrapper.appendChild(gifsItem); 
     }
+  
+}
+const destoryhtml = (parent) =>{
+  let destoryPoint = parent;
+  while (destoryPoint.firstChild) {
+      destoryPoint.removeChild(destoryPoint.firstChild);
   }
+}
+gifBtn.addEventListener('click', getGif);
 
 
+searchInput.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+    gifBtn.click();
+  }
+});
